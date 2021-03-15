@@ -41,14 +41,14 @@ def train_step(base_model, anchor, positive, negative, optimizer):
             n_dist = tf.reduce_sum(tf.square(a_feat - n_feat), axis=-1)
             loss += -tf.reduce_mean(n_dist)
 
-        # Minimize prediction time-variance
+        # Encourage feature convergence
         loss += tf.reduce_mean(tf.square(
-            a_feat - tf.reduce_mean(a_feat, axis=1)))
+            a_feat - a_feat[:,:,-1]))
         loss += tf.reduce_mean(tf.square(
-            p_feat - tf.reduce_mean(p_feat, axis=1)))
+            p_feat - p_feat[:,:,-1]))
         if use_negative:
             loss += tf.reduce_mean(tf.square(
-                n_feat - tf.reduce_mean(n_feat, axis=1)))
+                n_feat - n_feat[:,:,-1]))
 
     grads = tape.gradient(loss, base_model.trainable_variables)
     grads_and_vars = zip(grads, base_model.trainable_variables)
